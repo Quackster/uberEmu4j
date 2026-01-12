@@ -51,15 +51,18 @@ jobs:
           OUT_DIR="release/uberemu4j-${TAG}"
           mkdir -p "${OUT_DIR}"
 
-          # The build is configured to output: ${project.name}-${project.version}.jar
-          # With version set to tag, we expect: uberemu4j-${TAG}.jar
-          JAR="build/libs/uberemuj-${TAG}.jar"
-          if [[ ! -f "${JAR}" ]]; then
-            echo "Expected jar not found at ${JAR}"
-            echo "Available build/libs:"
+          # Find the shadowJar output regardless of project.name casing
+          JAR_PATH="$(ls -1 build/libs/*-"${TAG}".jar | head -n 1 || true)"
+          if [[ -z "${JAR_PATH}" || ! -f "${JAR_PATH}" ]]; then
+            echo "Expected jar not found for tag ${TAG} in build/libs"
             ls -la build/libs || true
             exit 1
           fi
+          
+          # Force the published filename to match the desired convention:
+          PUBLISHED_JAR="uberEmu4j-${TAG}.jar"
+          cp "${JAR_PATH}" "${OUT_DIR}/${PUBLISHED_JAR}"
+
 
           cp "${JAR}" "${OUT_DIR}/"
 
@@ -96,7 +99,9 @@ jobs:
 
           # Replace the placeholder reference inside scripts (and any other text files in the bundle)
           find "${OUT_DIR}" -type f \( -name "*.sh" -o -name "*.bat" -o -name "*.txt" -o -name "*.md" \) -print0 \
-            | xargs -0 sed -i "s/uberemu4j-\\[TAG\\]-SNAPSHOT\\.jar/uberemu4j-${TAG}.jar/g"
+            | xargs -0 sed -i \
+              -e "s/<TAG>/${TAG}/g" \
+              -e "s/uberemu-\\[TAG\\]-SNAPSHOT\\.jar/${PUBLISHED_JAR}/g"
 
           # Zip it up
           (cd "release" && zip -r "uberemu4j-${TAG}.zip" "uberemu4j-${TAG}")
