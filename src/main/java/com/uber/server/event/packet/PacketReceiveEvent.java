@@ -34,7 +34,7 @@ public abstract class PacketReceiveEvent extends Event implements Cancellable {
      * Gets the raw message.
      * @return ClientMessage instance
      */
-    public ClientMessage getMessage() {
+    public ClientMessage getClientMessage() {
         return message;
     }
     

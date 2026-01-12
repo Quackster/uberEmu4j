@@ -35,8 +35,8 @@ public class LookAtHandler implements PacketHandler {
         }
         
         // Use event fields instead of local variables
-        targetX = event.getTargetX();
-        targetY = event.getTargetY();
+        targetX = event.getX();
+        targetY = event.getY();
         
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {

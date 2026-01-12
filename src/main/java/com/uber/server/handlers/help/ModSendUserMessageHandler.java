@@ -36,7 +36,7 @@ public class ModSendUserMessageHandler implements PacketHandler {
         
         // Use event fields instead of local variables
         userId = event.getUserId();
-        userMessage = event.getUserMessage();
+        userMessage = event.getMessage();
         
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_alert")) {

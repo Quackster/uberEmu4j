@@ -36,7 +36,7 @@ public class ModKickUserHandler implements PacketHandler {
         
         // Use event fields instead of local variables
         userId = event.getUserId();
-        kickMessage = event.getKickMessage();
+        kickMessage = event.getMessage();
         
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.hasFuse("fuse_kick")) {

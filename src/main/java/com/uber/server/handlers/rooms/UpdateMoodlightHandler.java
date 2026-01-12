@@ -67,16 +67,10 @@ public class UpdateMoodlightHandler implements PacketHandler {
             return;
         }
         
-        int preset = presetId;
-        String colorCode = message.popFixedString();
-        int intensity = message.popWiredInt32();
-        
-        boolean backgroundOnly = (backgroundMode >= 2);
-        
         com.uber.server.game.items.MoodlightData moodlight = room.getMoodlightData();
         moodlight.setEnabled(true);
-        moodlight.setCurrentPreset(preset);
-        moodlight.updatePreset(preset, colorCode, intensity, backgroundOnly);
+        moodlight.setCurrentPreset(presetId);
+        moodlight.updatePreset(presetId, color, intensity, backgroundOnly);
         
         // Update item extra data
         dimmerItem.setExtraData(moodlight.generateExtraData());

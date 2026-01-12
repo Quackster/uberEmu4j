@@ -6,6 +6,8 @@ The project reimplements the original emulator in Java while preserving function
 Original C# implementation:  
 https://github.com/Quackster/uberEmu
 
+**This release requires Java 24 runtime**
+
 ---
 
 ## Overview

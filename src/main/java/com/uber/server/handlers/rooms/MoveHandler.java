@@ -34,8 +34,8 @@ public class MoveHandler implements PacketHandler {
         }
         
         // Use event fields instead of local variables
-        moveX = event.getMoveX();
-        moveY = event.getMoveY();
+        moveX = event.getX();
+        moveY = event.getY();
         
         Habbo habbo = client.getHabbo();
         if (habbo == null || !habbo.isInRoom()) {

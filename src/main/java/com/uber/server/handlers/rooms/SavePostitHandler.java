@@ -26,8 +26,10 @@ public class SavePostitHandler implements PacketHandler {
         message.resetPointer();
         
         long itemId = message.popWiredUInt();
-        String postitText = message.popFixedString();
-        String postitColor = message.popFixedString();
+        String data = message.popFixedString();
+
+        String postitColor = data.split(" ")[0];
+        String postitText = StringUtil.filterInjectionChars(data.substring(postitColor.length() + 1), true);
         
         com.uber.server.event.packet.room.SavePostitEvent event = new com.uber.server.event.packet.room.SavePostitEvent(client, message, itemId, postitText, postitColor);
         com.uber.server.game.Game.getInstance().getEventManager().callEvent(event);
