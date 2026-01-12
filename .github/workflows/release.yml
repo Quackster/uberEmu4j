@@ -100,7 +100,23 @@ jobs:
 
           # Zip it up
           (cd "release" && zip -r "uberEmu4j-${TAG}.zip" "uberEmu4j-${TAG}")
+      - name: Commit updated version to build.gradle
+        shell: bash
+        run: |
+          set -euo pipefail
 
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Only commit if build.gradle actually changed
+          if git diff --quiet build.gradle; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git add build.gradle
+          git commit -m "chore: set version to ${GITHUB_REF_NAME}"
+          git push
       - name: Create GitHub Release + upload assets
         uses: softprops/action-gh-release@v2
         with:
