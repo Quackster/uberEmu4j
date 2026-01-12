@@ -1,0 +1,93 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.gradleup.shadow' version '9.3.1'
+}
+
+group = 'com.uber'
+version = '1.0.0-SNAPSHOT'
+mainClassName = 'com.uber.server.Main'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+    toolchain { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/io.netty/netty-all
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.33.Final'
+
+    // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
+    implementation group: 'com.zaxxer', name: 'HikariCP', version: '3.4.1'
+
+    // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
+    implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.2.5'
+
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.9'
+
+    // Logback Classic - SLF4J implementation with Logback
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    runtimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.3'
+
+    // Log4j 2.x API for HabboPacketDecoder (using Log4j API but routing through SLF4J/Logback)
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.23.1'
+    
+    // Log4j to SLF4J bridge - routes Log4j calls through SLF4J/Logback
+    // This replaces log4j-core at runtime, allowing Log4j API calls to use Logback configuration
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-to-slf4j
+    runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.23.1'
+
+    // Testing
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
+    
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
+}
+
+// Configure the shadow jar (fat jar). Defaults to classifier "all".
+// The below sets the file name to the expected output
+tasks.shadowJar {
+    // Produces <project.name>-<project.version>.jar (no "-all" suffix).
+    archiveClassifier.set("")
+    archiveFileName.set("${project.name}-${project.version}.jar")
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+// Make sure start scripts use shadow jar
+tasks.startScripts {
+    dependsOn tasks.shadowJar
+    doFirst {
+        classpath = files(tasks.shadowJar.archiveFile)
+    }
+}
+
+// Make distribution tasks use shadow jar
+tasks.distZip {
+    dependsOn tasks.shadowJar
+}
+
+tasks.distTar {
+    dependsOn tasks.shadowJar
+}
+
+// Make the shadow jar the default jar artifact
+artifacts {
+    archives tasks.named("shadowJar")
+}
+
+// Make jar task depend on shadowJar so it's built first
+tasks.jar {
+    enabled = false
+    dependsOn tasks.shadowJar
+}
