@@ -1,0 +1,112 @@
+name: Release (tag)
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: gradle
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Set version in build.gradle from tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+
+          # build.gradle currently contains: version = '...'
+          # Replace the value with the tag name (e.g. 1.2.3 or v1.2.3)
+          perl -0777 -i -pe "s/version\\s*=\\s*'[^']*'/version = '${TAG}'/g" build.gradle
+
+          echo "Updated version in build.gradle to: ${TAG}"
+          grep -n "version" build.gradle || true
+
+      - name: Build shadowJar
+        run: ./gradlew --no-daemon clean shadowJar
+
+      - name: Prepare release bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+
+          OUT_DIR="release/uberEmu4j-${TAG}"
+          mkdir -p "${OUT_DIR}"
+
+          # The build is configured to output: ${project.name}-${project.version}.jar
+          # With version set to tag, we expect: uberEmu4j-${TAG}.jar
+          JAR="build/libs/uberEmu4j-${TAG}.jar"
+          if [[ ! -f "${JAR}" ]]; then
+            echo "Expected jar not found at ${JAR}"
+            echo "Available build/libs:"
+            ls -la build/libs || true
+            exit 1
+          fi
+
+          cp "${JAR}" "${OUT_DIR}/"
+
+          # Include conf + sql (repo files are: uber-config.conf and uberdb.sql)
+          cp -v ./*.conf "${OUT_DIR}/" 2>/dev/null || true
+          cp -v ./*.sql  "${OUT_DIR}/" 2>/dev/null || true
+
+          # Create startup scripts with the placeholder the user requested,
+          # then replace it to the actual jar name used in the bundle.
+          cat > "${OUT_DIR}/start-linux.sh" <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+          cd "${DIR}"
+
+          # Placeholder expected by packaging step:
+          JAR="uberemu-[TAG]-SNAPSHOT.jar"
+
+          exec java -jar "${JAR}"
+          EOF
+          chmod +x "${OUT_DIR}/start-linux.sh"
+
+          cat > "${OUT_DIR}/start-windows.bat" <<'EOF'
+          @echo off
+          setlocal enabledelayedexpansion
+          cd /d "%~dp0"
+
+          rem Placeholder expected by packaging step:
+          set "JAR=uberemu-[TAG]-SNAPSHOT.jar"
+
+          java -jar "%JAR%"
+          endlocal
+          EOF
+
+          # Replace the placeholder reference inside scripts (and any other text files in the bundle)
+          find "${OUT_DIR}" -type f \( -name "*.sh" -o -name "*.bat" -o -name "*.txt" -o -name "*.md" \) -print0 \
+            | xargs -0 sed -i "s/uberemu-\\[TAG\\]-SNAPSHOT\\.jar/uberEmu4j-${TAG}.jar/g"
+
+          # Zip it up
+          (cd "release" && zip -r "uberEmu4j-${TAG}.zip" "uberEmu4j-${TAG}")
+
+      - name: Create GitHub Release + upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            release/uberEmu4j-${{ github.ref_name }}.zip
+            build/libs/uberEmu4j-${{ github.ref_name }}.jar
