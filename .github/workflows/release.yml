@@ -63,7 +63,7 @@ jobs:
           PUBLISHED_JAR="uberEmu4j-${TAG}.jar"
           cp "${JAR_PATH}" "${OUT_DIR}/${PUBLISHED_JAR}"
 
-          # Include conf + sql (repo files are: uber-config.conf and uberdb.sql)
+          # Include conf + sql inside the bundle (repo files are: uber-config.conf and uberdb.sql)
           cp -v ./*.conf "${OUT_DIR}/" 2>/dev/null || true
           cp -v ./*.sql  "${OUT_DIR}/" 2>/dev/null || true
 
@@ -88,7 +88,7 @@ jobs:
           cd /d "%~dp0"
 
           rem Placeholder expected by packaging step:
-          set "JAR=uberemu4j-[TAG]-SNAPSHOT.jar"
+          set "JAR=uberemu4j-[TAG].jar"
 
           java -jar "%JAR%"
           endlocal
@@ -98,10 +98,10 @@ jobs:
           find "${OUT_DIR}" -type f \( -name "*.sh" -o -name "*.bat" -o -name "*.txt" -o -name "*.md" \) -print0 \
             | xargs -0 sed -i \
               -e "s/<TAG>/${TAG}/g" \
-              -e "s/uberemu-\\[TAG\\]-SNAPSHOT\\.jar/${PUBLISHED_JAR}/g"
+              -e "s/uberemu-\\[TAG\\]\\.jar/${PUBLISHED_JAR}/g"
 
-          # Zip it up (NOTE: filename is lowercase uberemu4j to match upload step)
-          (cd "release" && zip -r "uberemu4j-${TAG}.zip" "uberemu4j-${TAG}")
+          # Zip it up with a name that makes it obvious it includes everything
+          (cd "release" && zip -r "uberemu4j-${TAG}-all.zip" "uberemu4j-${TAG}")
 
       - name: Show release artifacts
         run: |
@@ -119,5 +119,7 @@ jobs:
           name: ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            release/uberemu4j-${{ github.ref_name }}.zip
+            release/uberemu4j-${{ github.ref_name }}-all.zip
             release/uberemu4j-${{ github.ref_name }}/uberEmu4j-${{ github.ref_name }}.jar
+            *.conf
+            *.sql
