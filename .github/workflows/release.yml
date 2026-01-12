@@ -60,7 +60,7 @@ jobs:
           fi
 
           # Force the published filename to match the desired convention:
-          PUBLISHED_JAR="uberEmu4j-${TAG}.jar"
+          PUBLISHED_JAR="uberemu4j-${TAG}.jar"
           cp "${JAR_PATH}" "${OUT_DIR}/${PUBLISHED_JAR}"
 
           # Include conf + sql inside the bundle (repo files are: uber-config.conf and uberdb.sql)
@@ -74,7 +74,7 @@ jobs:
           DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
           cd "${DIR}"
 
-          JAR="uberEmu4j-[TAG].jar"
+          JAR="uberemu4j-[TAG].jar"
 
           exec java -jar "$JAR"
           EOF
@@ -85,7 +85,7 @@ jobs:
           setlocal enabledelayedexpansion
           cd /d "%~dp0"
 
-          set "JAR=uberEmu4j-[TAG].jar"
+          set "JAR=uberemu4j-[TAG].jar"
 
           java -jar "%JAR%"
           endlocal
@@ -115,6 +115,6 @@ jobs:
           generate_release_notes: true
           files: |
             release/uberemu4j-${{ github.ref_name }}-all.zip
-            release/uberemu4j-${{ github.ref_name }}/uberEmu4j-${{ github.ref_name }}.jar
+            release/uberemu4j-${{ github.ref_name }}/uberemu4j-${{ github.ref_name }}.jar
             *.conf
             *.sql
