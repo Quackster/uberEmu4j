@@ -63,9 +63,6 @@ jobs:
           PUBLISHED_JAR="uberEmu4j-${TAG}.jar"
           cp "${JAR_PATH}" "${OUT_DIR}/${PUBLISHED_JAR}"
 
-
-          cp "${JAR}" "${OUT_DIR}/"
-
           # Include conf + sql (repo files are: uber-config.conf and uberdb.sql)
           cp -v ./*.conf "${OUT_DIR}/" 2>/dev/null || true
           cp -v ./*.sql  "${OUT_DIR}/" 2>/dev/null || true
@@ -81,7 +78,7 @@ jobs:
           # Placeholder expected by packaging step:
           JAR="uberemu4j-[TAG]-SNAPSHOT.jar"
 
-          exec java -jar "${JAR}"
+          exec java -jar "${PUBLISHED_JAR}"
           EOF
           chmod +x "${OUT_DIR}/start-linux.sh"
 
