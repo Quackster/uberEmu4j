@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.uber'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0'
 mainClassName = 'com.uber.server.Main'
 
 repositories {
@@ -27,8 +27,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
     implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.2.5'
-
-
+    
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.9'
 
