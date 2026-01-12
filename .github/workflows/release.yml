@@ -58,7 +58,7 @@ jobs:
             ls -la build/libs || true
             exit 1
           fi
-          
+
           # Force the published filename to match the desired convention:
           PUBLISHED_JAR="uberEmu4j-${TAG}.jar"
           cp "${JAR_PATH}" "${OUT_DIR}/${PUBLISHED_JAR}"
@@ -100,25 +100,18 @@ jobs:
               -e "s/<TAG>/${TAG}/g" \
               -e "s/uberemu-\\[TAG\\]-SNAPSHOT\\.jar/${PUBLISHED_JAR}/g"
 
-          # Zip it up
+          # Zip it up (NOTE: filename is lowercase uberemu4j to match upload step)
           (cd "release" && zip -r "uberemu4j-${TAG}.zip" "uberemu4j-${TAG}")
-      - name: Commit updated version to build.gradle
-        shell: bash
+
+      - name: Show release artifacts
         run: |
-          set -euo pipefail
+          echo "=== release dir ==="
+          ls -la release || true
+          echo "=== bundle dir ==="
+          ls -la release/uberemu4j-${{ github.ref_name }} || true
+          echo "=== build/libs ==="
+          ls -la build/libs || true
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Only commit if build.gradle actually changed
-          if git diff --quiet build.gradle; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git add build.gradle
-          git commit -m "chore: set version to ${GITHUB_REF_NAME}"
-          git push
       - name: Create GitHub Release + upload assets
         uses: softprops/action-gh-release@v2
         with:
@@ -126,5 +119,5 @@ jobs:
           name: ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            release/uberEmu4j-${{ github.ref_name }}.zip
-            build/libs/uberEmu4j-${{ github.ref_name }}.jar
+            release/uberemu4j-${{ github.ref_name }}.zip
+            release/uberemu4j-${{ github.ref_name }}/uberEmu4j-${{ github.ref_name }}.jar
