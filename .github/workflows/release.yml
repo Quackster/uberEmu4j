@@ -48,11 +48,11 @@ jobs:
           set -euo pipefail
           TAG="${GITHUB_REF_NAME}"
 
-          OUT_DIR="release/uberEmu4j-${TAG}"
+          OUT_DIR="release/uberemu4j-${TAG}"
           mkdir -p "${OUT_DIR}"
 
           # The build is configured to output: ${project.name}-${project.version}.jar
-          # With version set to tag, we expect: uberEmu4j-${TAG}.jar
+          # With version set to tag, we expect: uberemu4j-${TAG}.jar
           JAR="build/libs/uberEmu4j-${TAG}.jar"
           if [[ ! -f "${JAR}" ]]; then
             echo "Expected jar not found at ${JAR}"
@@ -76,7 +76,7 @@ jobs:
           cd "${DIR}"
 
           # Placeholder expected by packaging step:
-          JAR="uberemu-[TAG]-SNAPSHOT.jar"
+          JAR="uberemu4j-[TAG]-SNAPSHOT.jar"
 
           exec java -jar "${JAR}"
           EOF
@@ -88,7 +88,7 @@ jobs:
           cd /d "%~dp0"
 
           rem Placeholder expected by packaging step:
-          set "JAR=uberemu-[TAG]-SNAPSHOT.jar"
+          set "JAR=uberemu4j-[TAG]-SNAPSHOT.jar"
 
           java -jar "%JAR%"
           endlocal
@@ -96,10 +96,10 @@ jobs:
 
           # Replace the placeholder reference inside scripts (and any other text files in the bundle)
           find "${OUT_DIR}" -type f \( -name "*.sh" -o -name "*.bat" -o -name "*.txt" -o -name "*.md" \) -print0 \
-            | xargs -0 sed -i "s/uberemu-\\[TAG\\]-SNAPSHOT\\.jar/uberEmu4j-${TAG}.jar/g"
+            | xargs -0 sed -i "s/uberemu4j-\\[TAG\\]-SNAPSHOT\\.jar/uberemu4j-${TAG}.jar/g"
 
           # Zip it up
-          (cd "release" && zip -r "uberEmu4j-${TAG}.zip" "uberEmu4j-${TAG}")
+          (cd "release" && zip -r "uberemu4j-${TAG}.zip" "uberemu4j-${TAG}")
       - name: Commit updated version to build.gradle
         shell: bash
         run: |
