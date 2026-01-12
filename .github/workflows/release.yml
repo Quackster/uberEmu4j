@@ -67,18 +67,16 @@ jobs:
           cp -v ./*.conf "${OUT_DIR}/" 2>/dev/null || true
           cp -v ./*.sql  "${OUT_DIR}/" 2>/dev/null || true
 
-          # Create startup scripts with the placeholder the user requested,
-          # then replace it to the actual jar name used in the bundle.
+          # Create startup scripts with a placeholder that will be replaced below
           cat > "${OUT_DIR}/start-linux.sh" <<'EOF'
           #!/usr/bin/env bash
           set -euo pipefail
           DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
           cd "${DIR}"
 
-          # Placeholder expected by packaging step:
-          JAR="uberemu4j-[TAG]-SNAPSHOT.jar"
+          JAR="uberEmu4j-[TAG].jar"
 
-          exec java -jar "${PUBLISHED_JAR}"
+          exec java -jar "$JAR"
           EOF
           chmod +x "${OUT_DIR}/start-linux.sh"
 
@@ -87,18 +85,15 @@ jobs:
           setlocal enabledelayedexpansion
           cd /d "%~dp0"
 
-          rem Placeholder expected by packaging step:
-          set "JAR=uberemu4j-[TAG].jar"
+          set "JAR=uberEmu4j-[TAG].jar"
 
           java -jar "%JAR%"
           endlocal
           EOF
 
-          # Replace the placeholder reference inside scripts (and any other text files in the bundle)
+          # Replace the [TAG] placeholder inside scripts with the actual tag
           find "${OUT_DIR}" -type f \( -name "*.sh" -o -name "*.bat" -o -name "*.txt" -o -name "*.md" \) -print0 \
-            | xargs -0 sed -i \
-              -e "s/<TAG>/${TAG}/g" \
-              -e "s/uberemu-\\[TAG\\]\\.jar/${PUBLISHED_JAR}/g"
+            | xargs -0 sed -i "s/\\[TAG\\]/${TAG}/g"
 
           # Zip it up with a name that makes it obvious it includes everything
           (cd "release" && zip -r "uberemu4j-${TAG}-all.zip" "uberemu4j-${TAG}")
