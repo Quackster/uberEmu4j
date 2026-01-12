@@ -53,7 +53,7 @@ jobs:
 
           # The build is configured to output: ${project.name}-${project.version}.jar
           # With version set to tag, we expect: uberemu4j-${TAG}.jar
-          JAR="build/libs/uberEmu4j-${TAG}.jar"
+          JAR="build/libs/uberemuj-${TAG}.jar"
           if [[ ! -f "${JAR}" ]]; then
             echo "Expected jar not found at ${JAR}"
             echo "Available build/libs:"
